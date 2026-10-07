@@ -57,7 +57,7 @@ DEFAULT_CONFIG = {
     "notify_lineup": True,
     # Övriga matcher i serien: mål, assist och utvisningar/numerär till ett eget ntfy-ämne
     "follow_league": True,
-    "ntfy_topic_league": "ha-live-stj2q222p2",
+    "ntfy_topic_league": "",
     "league_poll_seconds": 30,
     "league_penalties": False,   # utvisningar i övriga matcher
     "league_final": False,       # slutresultat i övriga matcher
@@ -185,6 +185,10 @@ def save_json(path, data):
 def load_config():
     cfg = dict(DEFAULT_CONFIG)
     cfg.update(load_json(CONFIG_PATH, {}))
+    # I molnet (GitHub Actions) kommer ämnena från hemliga miljövariabler
+    for env, key in (("NTFY_TOPIC", "ntfy_topic"), ("NTFY_TOPIC_LEAGUE", "ntfy_topic_league")):
+        if os.environ.get(env):
+            cfg[key] = os.environ[env].strip()
     return cfg
 
 
@@ -987,7 +991,8 @@ def poll_game(cfg, g, followers):
         log("Slut: %s – %s %s" % (info["home"], info["away"], info["score"]))
 
 
-def run(cfg):
+def run(cfg, deadline=None):
+    """deadline: kör bara till denna tid (används i molnet, där ett jobb max får gå 6 h)."""
     log("Bevakaren startad (Bofors + övriga matcher).")
     followers = {}
     caff = None
@@ -1005,7 +1010,15 @@ def run(cfg):
                   and not state.get(str(g["game_id"]), {}).get("final")
                   and (g["ours"] or cfg.get("follow_league", True))]
         t = now()
+        if deadline and t >= deadline:
+            log("Tidsgränsen för den här körningen är nådd – nästa körning tar vid.")
+            return
         active = [g for g in todays if watch_window(g)[0] <= t <= watch_window(g)[1]]
+        if not active and deadline:
+            starts = [watch_window(g)[0] for g in todays if watch_window(g)[0] > t]
+            if not starts or min(starts) > deadline - dt.timedelta(minutes=20):
+                log("Inga fler matcher att bevaka i den här körningen.")
+                return
         if not active:
             if caff:
                 caff.terminate()
@@ -1076,6 +1089,9 @@ def main():
             except Exception as e:
                 log("Oväntat fel: %r – startar om om en minut." % e)
                 time.sleep(60)
+    elif cmd == "ci":
+        # Molnkörning: bevaka i högst ~5 h 40 min, sedan tar nästa schemalagda körning vid
+        run(cfg, deadline=now() + dt.timedelta(minutes=340))
     elif cmd == "test":
         ok = notify(cfg, "Bofors-bevakaren fungerar!",
                     "Du får notiser här vid mål, assist, utvisningar och PP/BP i Bofors matcher.",

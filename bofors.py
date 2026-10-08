@@ -521,6 +521,61 @@ def line_on_ice(team, nums):
     return nr if c >= 2 else None
 
 
+# ---------- Stil C: supporterstil ----------
+_SUFFIX = re.compile(r"\s+(IF|IK|HC|HK|SK|IS|BK|FF|Hockey)$")
+_NOMINATIVE = {"Leksands": "Leksand", "Östersunds": "Östersund"}
+
+
+def short_team(name):
+    """'Leksands IF' -> 'Leksand', 'IK Oskarshamn' -> 'Oskarshamn', 'MoDo Hockey' -> 'MoDo'"""
+    n = (name or "").strip()
+    n = re.sub(r"^(IK|IF|HC)\s+", "", n)
+    n = _SUFFIX.sub("", n)
+    return _NOMINATIVE.get(n, n)
+
+
+def genitive(name):
+    n = short_team(name)
+    if n in _NOMINATIVE.values():
+        n = {v: k for k, v in _NOMINATIVE.items()}[n]
+        return n
+    return n if n[-1:].lower() in ("s", "x", "z") else n + "s"
+
+
+def plain_name(player):
+    """'Jesper Emanuelsson (41)' -> 'Jesper Emanuelsson'"""
+    return re.sub(r"\s*\(\d+\)\s*$", "", player or "").strip()
+
+
+def surname(player):
+    n = plain_name(player)
+    return n.split(" ")[-1] if n else n
+
+
+def join_sv(items):
+    items = [i for i in items if i]
+    if len(items) <= 1:
+        return "".join(items)
+    return ", ".join(items[:-1]) + " & " + items[-1]
+
+
+def our_score(score, we_home):
+    """'2-1' (hemma-borta) -> (vi, de)"""
+    try:
+        h, a = [int(x) for x in (score or "0-0").split("-")]
+    except Exception:
+        return 0, 0
+    return (h, a) if we_home else (a, h)
+
+
+def score_at(events, t, we_home):
+    sc = "0-0"
+    for e in events:
+        if e["type"] == "goal" and e["sec"] is not None and e["sec"] <= t:
+            sc = e["score"]
+    return our_score(sc, we_home)
+
+
 def strength_affecting(ev):
     """Påverkar utvisningen numerären? (2, 2+2, 5 min gör det, 10/20 inte)"""
     return ev["minutes"] in (2, 4, 5) or ev.get("minutes_txt", "").startswith(("2", "5"))
@@ -617,14 +672,14 @@ class GameFollower:
             if d:
                 row += "  (backar %s)" % ", ".join(last_name(x) for x in d)
             rows.append(row)
-        self.send("Kvällens kedjor – %s" % self.cfg["team_name"], "\n".join(rows) + "\n" + header, ["clipboard"], 3)
+        self.send("Kvällens kedjor 📋", "\n".join(rows) + "\n" + header, None, 3)
 
     def shots_text(self, info, we_home):
         if not info.get("shots"):
             return ""
         h, a = info["shots"]
         us, them = (h, a) if we_home else (a, h)
-        return "Skott: %s %d – %d" % (self.cfg["team_name"], us, them)
+        return "Skott %d–%d" % (us, them)
 
     def send(self, title, msg, tags=None, priority=3):
         if getattr(self, "league", False):
@@ -720,7 +775,9 @@ class GameFollower:
         if info["events"] and not self.st["started"]:
             self.st["started"] = True
             if not silent and self.cfg.get("notify_start_and_final", True):
-                self.send("Nedsläpp!", "%s har börjat." % header, ["ice_hockey"], 3)
+                hs = team_name if we_home else short_team(info["home"])
+                as_ = short_team(info["away"]) if we_home else team_name
+                self.send("Nedsläpp! 🏒", "%s – %s är igång. Heja %s!" % (hs, as_, team_name), None, 3)
 
         goals_now = [e for e in info["events"] if e["type"] == "goal"]
         cur_keys = set("%s|%s" % (e["time"], e["team"]) for e in goals_now)
@@ -758,31 +815,57 @@ class GameFollower:
                 ours = ev["team"] == us_abbr
                 if not ours and not self.cfg.get("notify_opponent_goals", True):
                     continue
-                lines = []
-                scorer = ev["scorer"]
-                if ev.get("season_goals"):
-                    scorer += " – %s målet för säsongen" % ordinal_sv(ev["season_goals"])
-                lines.append("Mål: " + scorer)
-                lines.append("Assist: " + (", ".join(ev["assists"]) if ev["assists"] else "ingen (soloprestation)"))
-                sit = goal_situation_text(ev["situation"], ours, team_name)
+                us_n, them_n = our_score(ev["score"], we_home)
+                sc = "%d–%d" % (us_n, them_n)
+                code = (ev["situation"] or "").upper()
+                if "PP2" in code:
+                    sit = "i dubbelt powerplay 🚀🚀"
+                elif "PP" in code:
+                    sit = "i powerplay 🚀"
+                elif "SH" in code:
+                    sit = "i boxplay" + ("! 💪" if ours else "")
+                elif "ENG" in code or code == "EN":
+                    sit = "i tom bur"
+                elif "PS" in code:
+                    sit = "på straffslag"
+                else:
+                    sit = ""
+                assists = [surname(a) for a in ev["assists"]]
+                ast = ("Assist: " + join_sv(assists)) if assists else "Soloprestation!"
                 if sit:
-                    lines.append(sit)
+                    ast += " · " + sit
+                tail = "%s, %s" % (ev["time"], ev["period"] or "")
                 kedja = line_on_ice(self.our_lineup(), ev.get("pos") if ours else ev.get("neg"))
                 if kedja:
-                    lines.append("%s kedja %d på isen" % (team_name, kedja))
+                    tail += (" · Kedja %d på isen" if ours else " · %s kedja %%d på isen" % team_name) % kedja
                 st_txt = self.shots_text(info, we_home)
                 if st_txt:
-                    lines.append(st_txt)
-                lines.append("%s %s · %s, %s" % (header, ev["score"], ev["time"], ev["period"] or ""))
-                if old is not None:
-                    title = "Rättelse, målet till %s" % ev["score"]
-                    tags, prio = ["pencil2"], 3
-                elif ours:
-                    title = "MÅL %s! %s" % (team_name.upper(), ev["score"])
-                    tags, prio = ["rotating_light", "ice_hockey"], 5
+                    tail += " · " + st_txt
+                scorer = plain_name(ev["scorer"])
+                if ours:
+                    if ev.get("season_goals"):
+                        line1 = "%s smäller in sin %s för säsongen!" % (scorer, ordinal_sv(ev["season_goals"]))
+                    else:
+                        line1 = "%s gör mål!" % scorer
                 else:
-                    title = "Mål %s. %s" % (opp, ev["score"])
-                    tags, prio = ["ice_hockey"], 4
+                    line1 = "Mål: %s" % scorer + (" (%s för säsongen)" % ordinal_sv(ev["season_goals"]) if ev.get("season_goals") else "")
+                lines = [line1, ast, tail]
+                o = short_team(opp)
+                if old is not None:
+                    title = "Rättelse: målet till %s ✏️" % sc
+                    tags, prio = None, 3
+                elif ours:
+                    title = "MÅÅÅL %s!!! 🔥 %s" % (team_name.upper(), sc)
+                    tags, prio = None, 5
+                else:
+                    if them_n > us_n:
+                        verb = "tar ledningen" if them_n - us_n == 1 else "utökar till"
+                    elif them_n == us_n:
+                        verb = "kvitterar"
+                    else:
+                        verb = "reducerar"
+                    title = "%s %s %s" % (o, verb, sc)
+                    tags, prio = None, 4
                 self.send(title, "\n".join(lines), tags, prio)
 
             elif ev["type"] == "penalty":
@@ -793,37 +876,51 @@ class GameFollower:
                 if silent:
                     continue
                 ours = ev["team"] == us_abbr
-                who = team_name if ours else opp
-                lines = [
-                    "%s: %s" % (who, ev["player"] or "Lagstraff"),
-                    "Straff: %s min – %s" % (ev["minutes_txt"], penalty_sv(ev["reason"]) or "orsak ej angiven"),
-                    situation_text(info, ev, us_abbr, them_abbr, team_name),
-                    "%s · %s, %s" % (header, ev["time"], ev["period"] or ""),
-                ]
+                who_gen = team_name if ours else genitive(opp)
+                pname = plain_name(ev["player"]) or "Lagstraff"
+                reason = penalty_sv(ev["reason"]) or "okänd orsak"
+                t = ev["start"] if ev.get("start") is not None else ev["sec"]
+                u, th = score_at(info["events"], t, we_home)
+                tail = "%s, %s · Ställning %d–%d" % (ev["time"], ev["period"] or "", u, th)
                 if strength_affecting(ev):
-                    pp = "POWERPLAY" in lines[2]
-                    bp = "BOXPLAY" in lines[2]
-                    title = ("Utvisning %s – %s i powerplay" % (opp, team_name)) if pp else \
-                            ("Utvisning %s – boxplay" % team_name) if bp else \
-                            ("Utvisning %s" % who)
+                    nus = active_penalties(info["events"], us_abbr, t)
+                    nthem = active_penalties(info["events"], them_abbr, t)
+                    us_on, them_on = 5 - min(nus, 2), 5 - min(nthem, 2)
+                    if nus < nthem:
+                        dbl = them_on <= 3
+                        title = ("DUBBELT POWERPLAY! 🚀🚀 %d mot %d" if dbl else "POWERPLAY %s! 🚀 %%d mot %%d" % team_name.upper()) % (us_on, them_on)
+                        lines = ["%s %s åker ut, %s min för %s" % (who_gen, pname, ev["minutes_txt"], reason),
+                                 ("Två mot ingen på bänken! " if dbl else "Nu kör vi! ") + tail]
+                        tags, prio = None, 4
+                    elif nus > nthem:
+                        title = "Utvisning %s %s – boxplay %d mot %d" % (team_name, "😬😬" if us_on <= 3 else "😬", us_on, them_on)
+                        lines = ["%s, %s min för %s" % (pname, ev["minutes_txt"], reason), tail]
+                        tags, prio = None, 4
+                    else:
+                        title = "%d mot %d på isen" % (us_on, them_on)
+                        lines = ["%s %s åker ut, %s min för %s" % (who_gen, pname, ev["minutes_txt"], reason), tail]
+                        tags, prio = None, 3
                 else:
-                    title = "Utvisning %s (%s min)" % (who, ev["minutes_txt"])
-                tags = ["warning"] if ours else ["muscle"]
-                self.send(title, "\n".join(lines), tags, 4)
+                    title = "Utvisning %s – %s min" % (team_name if ours else short_team(opp), ev["minutes_txt"])
+                    lines = ["%s, %s min för %s" % (pname, ev["minutes_txt"], reason),
+                             "Påverkar inte numerären · " + tail]
+                    tags, prio = None, 3
+                self.send(title, "\n".join(lines), tags, prio)
 
         # Periodslut och periodstart
         if self.cfg.get("notify_periods", True) and not info["final"]:
             pn = period_no(info.get("status"))
             started = self.st.get("period_started", 0)
             ended = self.st.get("period_ended", 0)
-            score_line = "Ställning: %s %s %s" % (header, info["score"] or "", info["periods"])
+            u, th = our_score(info["score"], we_home)
+            score_line = "Ställning %d–%d" % (u, th)
             if self.shots_text(info, we_home):
-                score_line += "\n" + self.shots_text(info, we_home)
+                score_line += " · " + self.shots_text(info, we_home)
 
             def end_period(n):
                 self.st["period_ended"] = n
                 if not silent:
-                    self.send("Slut på %s" % period_name(n).lower(), score_line, ["hourglass"], 3)
+                    self.send("Slut på %s ⏸" % period_name(n).lower(), score_line, None, 3)
 
             if pn:
                 if pn > started:
@@ -831,7 +928,7 @@ class GameFollower:
                         end_period(started)
                     self.st["period_started"] = pn
                     if pn >= 2 and not silent:
-                        self.send("%s har börjat" % period_name(pn), score_line, ["ice_hockey"], 3)
+                        self.send("%s igång! 🏒" % period_name(pn), score_line, None, 3)
                 limit = {1: 1200, 2: 2400, 3: 3600}.get(pn)
                 if limit and info.get("clock") is not None and info["clock"] >= limit \
                         and self.st.get("period_ended", 0) < pn:
@@ -855,11 +952,13 @@ class GameFollower:
                 missing.pop(k, None)
                 if silent:
                     continue
-                who = team_name if g.get("team") == us_abbr else opp
-                self.send("Mål bortdömt",
-                          "Målet av %s (%s) vid %s räknas inte längre.\nStällning nu: %s %s" % (
-                              g.get("scorer", "?"), who, g.get("time", "?"), header, info["score"] or ""),
-                          ["x"], 4)
+                u, th = our_score(info["score"], we_home)
+                if g.get("team") == us_abbr:
+                    title = "Målet bortdömt 😤"
+                else:
+                    title = "%s mål bortdömt 🙌" % genitive(opp)
+                self.send(title, "%s vid %s räknas inte.\nStällning nu %d–%d" % (
+                    plain_name(g.get("scorer", "?")), g.get("time", "?"), u, th), None, 4)
 
         if info["final"] and not self.st["final"]:
             self.st["final"] = True
@@ -867,11 +966,13 @@ class GameFollower:
                 we_score, they_score = (info["score"] or "0-0").split("-")
                 if not we_home:
                     we_score, they_score = they_score, we_score
-                res = "VINST" if int(we_score) > int(they_score) else "Förlust"
-                self.send("Slut: %s %s" % (header, info["score"]),
-                          ("%s %s %s-%s mot %s %s" % (res, team_name, we_score, they_score, opp, info["periods"]))
-                          + ("\n" + self.shots_text(info, we_home) if info.get("shots") else ""),
-                          ["checkered_flag"], 4)
+                win = int(we_score) > int(they_score)
+                title = ("VINST! 🎉 %s %s–%s %s" if win else "Förlust 😞 %s %s–%s %s") % (
+                    team_name, we_score, they_score, short_team(opp))
+                body = "Periodsiffror %s" % info["periods"].strip("()")
+                if info.get("shots"):
+                    body += " · " + self.shots_text(info, we_home)
+                self.send(title, body, None, 4)
         self.save()
 
 

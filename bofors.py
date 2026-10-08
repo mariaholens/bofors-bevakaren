@@ -258,8 +258,12 @@ def mmss_to_sec(s):
 
 
 def penalty_sv(reason):
+    # Visa straffet på engelska, precis som swehockey skriver det.
+    # (Sätt "penalty_language": "sv" i config för svenska.)
     if not reason:
         return ""
+    if load_config().get("penalty_language", "en") != "sv":
+        return reason.strip()
     key = re.sub(r"[^a-z]", "", reason.lower())
     sv = PENALTY_SV.get(key)
     if sv is None:

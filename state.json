@@ -1,0 +1,483 @@
+{
+  "1110372": {
+    "goals": {
+      "01:29|AIK": {
+        "scorer": "Rasmus Rudslätt (20)",
+        "assists": [
+          "Martin Schreiber (87)",
+          "Oskar Magnusson (58)"
+        ],
+        "time": "01:29",
+        "situation": "EQ",
+        "team": "AIK"
+      },
+      "11:25|BIK": {
+        "scorer": "Travis Treloar (10)",
+        "assists": [
+          "Nicholas Pastujov (71)"
+        ],
+        "time": "11:25",
+        "situation": "EQ",
+        "team": "BIK"
+      },
+      "23:22|AIK": {
+        "scorer": "Christoffer Björk (27)",
+        "assists": [
+          "Borna Kopac (13)",
+          "Christopher Bengtsson (25)"
+        ],
+        "time": "23:22",
+        "situation": "EQ",
+        "team": "AIK"
+      },
+      "28:14|AIK": {
+        "scorer": "Daniel Ljungman (29)",
+        "assists": [],
+        "time": "28:14",
+        "situation": "EQ",
+        "team": "AIK"
+      },
+      "35:09|AIK": {
+        "scorer": "Rasmus Rudslätt (20)",
+        "assists": [
+          "Theoklis Theocharidis (98)",
+          "Oliver Johansson (78)"
+        ],
+        "time": "35:09",
+        "situation": "PP1",
+        "team": "AIK"
+      },
+      "38:13|AIK": {
+        "scorer": "Daniel Ljungman (29)",
+        "assists": [
+          "Viktor Lennartsson (72)"
+        ],
+        "time": "38:13",
+        "situation": "EQ",
+        "team": "AIK"
+      },
+      "48:06|AIK": {
+        "scorer": "Viktor Lennartsson (72)",
+        "assists": [
+          "Edvin Isén (70)",
+          "Christoffer Björk (27)"
+        ],
+        "time": "48:06",
+        "situation": "EQ",
+        "team": "AIK"
+      },
+      "50:12|BIK": {
+        "scorer": "Nicholas Pastujov (71)",
+        "assists": [
+          "Lucas Ölvestad (8)",
+          "Jesper Emanuelsson (41)"
+        ],
+        "time": "50:12",
+        "situation": "PP1",
+        "team": "BIK"
+      },
+      "58:36|AIK": {
+        "scorer": "Scott Pooley (12)",
+        "assists": [
+          "Daniel Ljungman (29)",
+          "Tyler Vesel (23)"
+        ],
+        "time": "58:36",
+        "situation": "PP2",
+        "team": "AIK"
+      }
+    },
+    "penalties": [
+      "34:10|BIK|Gustaf Thorell (12)|2",
+      "36:01|AIK|Daniel Ljungman (29)|2",
+      "43:21|AIK|Scott Pooley (12)|2",
+      "43:21|BIK|Viktor Lang (22)|2",
+      "45:56|BIK|Gustaf Franzén (15)|2",
+      "49:36|AIK|Christoffer Björk (27)|20",
+      "49:36|AIK|Christoffer Björk (27)|5",
+      "55:06|BIK|Gustaf Franzén (15)|2",
+      "57:08|BIK|Viktor Lang (22)|2",
+      "57:51|BIK|Team penalty|2"
+    ],
+    "started": true,
+    "final": true,
+    "lineup_sent": true,
+    "missing": {},
+    "period_started": 3,
+    "period_ended": 3
+  },
+  "1110371": {
+    "goals": {
+      "01:41|SSK": {
+        "scorer": "Andrew Vanderbeck (91)",
+        "assists": [],
+        "time": "01:41",
+        "situation": "PS",
+        "team": "SSK"
+      },
+      "12:11|SSK": {
+        "scorer": "Daniel Norbe (27)",
+        "assists": [
+          "Daniel Muzito Bagenda (19)"
+        ],
+        "time": "12:11",
+        "situation": "EQ",
+        "team": "SSK"
+      },
+      "26:47|VIM": {
+        "scorer": "Hugo Lejon (58)",
+        "assists": [
+          "Kalle Carlsson (9)",
+          "Nick Bochen (21)"
+        ],
+        "time": "26:47",
+        "situation": "EQ",
+        "team": "VIM"
+      },
+      "35:36|VIM": {
+        "scorer": "Hugo Lejon (58)",
+        "assists": [
+          "Gustaf Malmkvist (7)",
+          "Linus Millner Westberg (68)"
+        ],
+        "time": "35:36",
+        "situation": "EQ",
+        "team": "VIM"
+      },
+      "60:32|SSK": {
+        "scorer": "Egor Polin (23)",
+        "assists": [],
+        "time": "60:32",
+        "situation": "EQ",
+        "team": "SSK"
+      }
+    },
+    "penalties": [
+      "27:34|SSK|Egor Polin (23)|2",
+      "29:23|VIM|Hannes Hellberg (96)|2",
+      "36:17|VIM|Nick Bochen (21)|2",
+      "41:48|SSK|Niklas Arell (44)|2",
+      "49:32|VIM|Oskar Lindgren (15)|2"
+    ],
+    "started": true,
+    "final": true,
+    "missing": {}
+  },
+  "1110373": {
+    "goals": {
+      "21:11|Kalm": {
+        "scorer": "Reece Vitelli (23)",
+        "assists": [
+          "Viktor Klingsell (9)",
+          "Marcus Limpar Lantz (93)"
+        ],
+        "time": "21:11",
+        "situation": "EQ",
+        "team": "Kalm"
+      },
+      "37:08|Kalm": {
+        "scorer": "Jakob Ihs-Wozniak (78)",
+        "assists": [
+          "Jesper Lindén (18)"
+        ],
+        "time": "37:08",
+        "situation": "EQ",
+        "team": "Kalm"
+      },
+      "40:32|Kalm": {
+        "scorer": "Viktor Klingsell (9)",
+        "assists": [
+          "Kim Johansson (25)",
+          "Christian Felton (8)"
+        ],
+        "time": "40:32",
+        "situation": "EQ",
+        "team": "Kalm"
+      }
+    },
+    "penalties": [
+      "06:20|Kalm|Valdemar Vesterlund (29)|2",
+      "13:09|AIS|Oskar Asplund (33)|2",
+      "18:02|Kalm|Christian Felton (8)|2",
+      "27:55|AIS|Victor Aronsson (4)|2",
+      "28:44|AIS|Leon Lerebäck (36)|2",
+      "32:00|AIS|Team penalty|2",
+      "43:32|AIS|Karl Sterner (34)|2",
+      "44:43|Kalm|Hampus Plato (13)|2",
+      "53:18|AIS|Viktor Johansson (22)|2"
+    ],
+    "started": true,
+    "final": true,
+    "missing": {}
+  },
+  "1110374": {
+    "goals": {
+      "13:01|MIK": {
+        "scorer": "Damien Giroux (71)",
+        "assists": [
+          "Ryland Mosley (77)",
+          "Hampus Larsson (27)"
+        ],
+        "time": "13:01",
+        "situation": "PP1",
+        "team": "MIK"
+      },
+      "17:55|MIK": {
+        "scorer": "Nils Juntorp (34)",
+        "assists": [
+          "Karl Umegård (91)",
+          "Isak Salqvist (22)"
+        ],
+        "time": "17:55",
+        "situation": "EQ",
+        "team": "MIK"
+      },
+      "21:05|MIK": {
+        "scorer": "Svante Sjödin (46)",
+        "assists": [
+          "Patrick Røbru Elvseen (26)"
+        ],
+        "time": "21:05",
+        "situation": "SH1",
+        "team": "MIK"
+      },
+      "28:55|IKO": {
+        "scorer": "Calle Karlsson (14)",
+        "assists": [
+          "Matthew Brown (10)",
+          "Ludvig Georgsson (19)"
+        ],
+        "time": "28:55",
+        "situation": "EQ",
+        "team": "IKO"
+      },
+      "29:58|MIK": {
+        "scorer": "Ryland Mosley (77)",
+        "assists": [
+          "Hampus Larsson (27)",
+          "Albin Udd (8)"
+        ],
+        "time": "29:58",
+        "situation": "EQ",
+        "team": "MIK"
+      },
+      "33:44|MIK": {
+        "scorer": "Ryland Mosley (77)",
+        "assists": [
+          "Oliver Tärnström (19)",
+          "Marcus Karlström (16)"
+        ],
+        "time": "33:44",
+        "situation": "PP1",
+        "team": "MIK"
+      },
+      "35:52|IKO": {
+        "scorer": "Joel Svensson (13)",
+        "assists": [
+          "Hugo Allvin (27)",
+          "Filiph Engsund (33)"
+        ],
+        "time": "35:52",
+        "situation": "EQ",
+        "team": "IKO"
+      },
+      "53:38|MIK": {
+        "scorer": "Patrick Røbru Elvseen (26)",
+        "assists": [
+          "Oliver Tärnström (19)",
+          "Svante Sjödin (46)"
+        ],
+        "time": "53:38",
+        "situation": "EQ",
+        "team": "MIK"
+      }
+    },
+    "penalties": [
+      "11:03|IKO|Melker Eriksson (41)|2",
+      "13:34|MIK|Georg Weigelt (20)|2",
+      "14:09|MIK|Jakob Norén (4)|2",
+      "20:46|MIK|Hampus Larsson (27)|2",
+      "24:59|IKO|Ludvig Markman (66)|2",
+      "32:02|IKO|Ville Svensson (59)|2",
+      "37:56|IKO|Axel Björnkvist (22)|2"
+    ],
+    "started": true,
+    "final": true,
+    "missing": {}
+  },
+  "1110375": {
+    "goals": {
+      "35:33|VIK": {
+        "scorer": "Theo Keilin (21)",
+        "assists": [
+          "Jimmie Jansson (10)",
+          "Fabian Hellström (88)"
+        ],
+        "time": "35:33",
+        "situation": "PP1",
+        "team": "VIK"
+      },
+      "47:19|VIK": {
+        "scorer": "Fabian Hellström (88)",
+        "assists": [
+          "Jimmie Jansson (10)",
+          "Victor Pantzare (16)"
+        ],
+        "time": "47:19",
+        "situation": "PP1",
+        "team": "VIK"
+      }
+    },
+    "penalties": [
+      "10:46|NYB|Team penalty|2",
+      "23:23|VIK|Daniel Gunnarsson (92)|2",
+      "30:48|NYB|Ludvig Warg (29)|2",
+      "32:54|NYB|Jesper Mångs (53)|2",
+      "34:43|NYB|Kalle Hemström (9)|2",
+      "43:13|VIK|Jimmie Jansson (10)|2",
+      "47:12|NYB|Elias Stenman (19)|2",
+      "48:41|VIK|Simen Andre Edvardsen (19)|2",
+      "50:55|VIK|Victor Pantzare (16)|10",
+      "54:48|VIK|Theo Keilin (21)|2"
+    ],
+    "started": true,
+    "final": true,
+    "missing": {}
+  },
+  "1110376": {
+    "goals": {
+      "54:20|MoDo": {
+        "scorer": "Emil Larsson (26)",
+        "assists": [
+          "Erik Jinesjö Karlsson (19)",
+          "Hugo Hallin (34)"
+        ],
+        "time": "54:20",
+        "situation": "EQ",
+        "team": "MoDo"
+      }
+    },
+    "penalties": [
+      "04:09|ÖST|Fredric Jansson (52)|2",
+      "07:18|MoDo|Jacob Bjerselius (15)|2",
+      "14:30|ÖST|Joachim Lunde Hermansen (21)|2",
+      "17:01|ÖST|Erik Flood (18)|2",
+      "20:45|MoDo|Troy Bourke (70)|2"
+    ],
+    "started": true,
+    "final": true,
+    "missing": {}
+  },
+  "1110377": {
+    "goals": {
+      "03:27|LIF": {
+        "scorer": "Tyler Kelleher (16)",
+        "assists": [
+          "Oskar Lang (14)",
+          "Åke Stakkestad (15)"
+        ],
+        "time": "03:27",
+        "situation": "PP1",
+        "team": "LIF"
+      },
+      "04:46|LIF": {
+        "scorer": "Josh Passolt (12)",
+        "assists": [
+          "Jonas Lagerberg-Hoen (8)"
+        ],
+        "time": "04:46",
+        "situation": "EQ",
+        "team": "LIF"
+      },
+      "16:08|LIF": {
+        "scorer": "Tyler Kelleher (16)",
+        "assists": [
+          "Åke Stakkestad (15)",
+          "Patrik Zackrisson (9)"
+        ],
+        "time": "16:08",
+        "situation": "PP1",
+        "team": "LIF"
+      },
+      "23:18|LIF": {
+        "scorer": "Dennis Altörn (17)",
+        "assists": [
+          "Rocky Langvardt (26)",
+          "Arvid Eljas (24)"
+        ],
+        "time": "23:18",
+        "situation": "EQ",
+        "team": "LIF"
+      },
+      "28:05|LIF": {
+        "scorer": "Josh Passolt (12)",
+        "assists": [
+          "Jonas Lagerberg-Hoen (8)",
+          "Tyler Angle (7)"
+        ],
+        "time": "28:05",
+        "situation": "EQ",
+        "team": "LIF"
+      },
+      "30:48|VIS": {
+        "scorer": "John Dahlström (18)",
+        "assists": [
+          "Giorgio Estephan (91)",
+          "Andreas Thelander (40)"
+        ],
+        "time": "30:48",
+        "situation": "PP1",
+        "team": "VIS"
+      },
+      "31:24|LIF": {
+        "scorer": "Tyler Kelleher (16)",
+        "assists": [
+          "Patrik Zackrisson (9)"
+        ],
+        "time": "31:24",
+        "situation": "EQ",
+        "team": "LIF"
+      },
+      "38:41|VIS": {
+        "scorer": "Elias Lindström (21)",
+        "assists": [
+          "Lucas Ramberg (61)",
+          "Hampus Engman (19)"
+        ],
+        "time": "38:41",
+        "situation": "PP1",
+        "team": "VIS"
+      },
+      "41:48|LIF": {
+        "scorer": "Dennis Altörn (17)",
+        "assists": [
+          "Carter Berger (23)",
+          "Josh Passolt (12)"
+        ],
+        "time": "41:48",
+        "situation": "EQ",
+        "team": "LIF"
+      },
+      "49:45|VIS": {
+        "scorer": "Ryan Gagnier (74)",
+        "assists": [
+          "Giorgio Estephan (91)"
+        ],
+        "time": "49:45",
+        "situation": "EQ",
+        "team": "VIS"
+      }
+    },
+    "penalties": [
+      "02:57|VIS|Karl Johansson (57)|2",
+      "15:55|VIS|Sebastian Fakt (48)|2",
+      "23:54|LIF|Tyler Kelleher (16)|2",
+      "29:16|LIF|Arvid Eljas (24)|2",
+      "33:14|LIF|Dennis Altörn (17)|2",
+      "36:27|LIF|Åke Stakkestad (15)|2"
+    ],
+    "started": true,
+    "final": false,
+    "missing": {}
+  }
+}

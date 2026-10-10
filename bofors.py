@@ -55,6 +55,7 @@ DEFAULT_CONFIG = {
     "notify_start_and_final": True,
     "notify_periods": True,
     "notify_lineup": True,
+    "correction_delay_seconds": 300,   # vänta 5 min innan rättelser skickas
     # Övriga matcher i serien: mål, assist och utvisningar/numerär till ett eget ntfy-ämne
     "follow_league": False,
     "ntfy_topic_league": "",
@@ -789,6 +790,52 @@ class GameFollower:
                     v["team"] = e["team"]
                     self.st["goals"]["%s|%s" % (e["time"], e["team"])] = v
         missing = self.st.setdefault("missing", {})
+        notified = self.st.setdefault("notified", {})
+        pending = self.st.setdefault("pending_fix", {})
+
+        def goal_msg(ev):
+            ours = ev["team"] == us_abbr
+            us_n, them_n = our_score(ev["score"], we_home)
+            sc = "%d–%d" % (us_n, them_n)
+            code = (ev["situation"] or "").upper()
+            if "PP2" in code:
+                sit = "i dubbelt powerplay" + (" 🚀🚀" if ours else "")
+            elif "PP" in code:
+                sit = "i powerplay" + (" 🚀" if ours else "")
+            elif "SH" in code:
+                sit = "i boxplay" + ("! 💪" if ours else "")
+            elif "ENG" in code or code == "EN":
+                sit = "i tom bur"
+            elif "PS" in code:
+                sit = "på straffslag"
+            else:
+                sit = ""
+            assists = [surname(a) for a in ev["assists"]]
+            if len(assists) >= 2:
+                ast = "1:a assist: %s · 2:a assist: %s" % (assists[0], assists[1])
+            elif assists:
+                ast = "1:a assist: %s" % assists[0]
+            else:
+                ast = "Soloprestation!"
+            if sit:
+                ast += " · " + sit
+            tail = "%s, %s" % (ev["time"], ev["period"] or "")
+            kedja = line_on_ice(self.our_lineup(), ev.get("pos") if ours else ev.get("neg"))
+            if kedja:
+                tail += (" · Kedja %d på isen" if ours else " · %s kedja %%d på isen" % team_name) % kedja
+            st_txt = self.shots_text(info, we_home)
+            if st_txt:
+                tail += " · " + st_txt
+            scorer = plain_name(ev["scorer"])
+            if ours:
+                if ev.get("season_goals"):
+                    line1 = "%s smäller in sin %s för säsongen!" % (scorer, ordinal_sv(ev["season_goals"]))
+                else:
+                    line1 = "%s gör mål!" % scorer
+            else:
+                line1 = "Mål: %s" % scorer + (" (%s för säsongen)" % ordinal_sv(ev["season_goals"]) if ev.get("season_goals") else "")
+            lines = [line1, ast, tail]
+            return lines, sc, ours, us_n, them_n
 
         for ev in info["events"]:
             if ev["type"] == "goal":
@@ -806,60 +853,24 @@ class GameFollower:
                 old = self.st["goals"].get(key)
                 if old is not None:
                     same = all(old.get(f) == summary[f] for f in ("scorer", "assists", "situation"))
+                    self.st["goals"][key] = summary
                     if same:
-                        self.st["goals"][key] = summary
                         continue
+                    # Ändrat mål: vänta (default 5 min) och skicka EN samlad rättelse
+                    notified.setdefault(key, old)
+                    if not silent:
+                        pending[key] = time.time()
+                    continue
                 self.st["goals"][key] = summary
                 if silent:
                     continue
+                notified[key] = summary
                 ours = ev["team"] == us_abbr
                 if not ours and not self.cfg.get("notify_opponent_goals", True):
                     continue
-                us_n, them_n = our_score(ev["score"], we_home)
-                sc = "%d–%d" % (us_n, them_n)
-                code = (ev["situation"] or "").upper()
-                if "PP2" in code:
-                    sit = "i dubbelt powerplay" + (" 🚀🚀" if ours else "")
-                elif "PP" in code:
-                    sit = "i powerplay" + (" 🚀" if ours else "")
-                elif "SH" in code:
-                    sit = "i boxplay" + ("! 💪" if ours else "")
-                elif "ENG" in code or code == "EN":
-                    sit = "i tom bur"
-                elif "PS" in code:
-                    sit = "på straffslag"
-                else:
-                    sit = ""
-                assists = [surname(a) for a in ev["assists"]]
-                if len(assists) >= 2:
-                    ast = "1:a assist: %s · 2:a assist: %s" % (assists[0], assists[1])
-                elif assists:
-                    ast = "1:a assist: %s" % assists[0]
-                else:
-                    ast = "Soloprestation!"
-                if sit:
-                    ast += " · " + sit
-                tail = "%s, %s" % (ev["time"], ev["period"] or "")
-                kedja = line_on_ice(self.our_lineup(), ev.get("pos") if ours else ev.get("neg"))
-                if kedja:
-                    tail += (" · Kedja %d på isen" if ours else " · %s kedja %%d på isen" % team_name) % kedja
-                st_txt = self.shots_text(info, we_home)
-                if st_txt:
-                    tail += " · " + st_txt
-                scorer = plain_name(ev["scorer"])
-                if ours:
-                    if ev.get("season_goals"):
-                        line1 = "%s smäller in sin %s för säsongen!" % (scorer, ordinal_sv(ev["season_goals"]))
-                    else:
-                        line1 = "%s gör mål!" % scorer
-                else:
-                    line1 = "Mål: %s" % scorer + (" (%s för säsongen)" % ordinal_sv(ev["season_goals"]) if ev.get("season_goals") else "")
-                lines = [line1, ast, tail]
+                lines, sc, ours, us_n, them_n = goal_msg(ev)
                 o = short_team(opp)
-                if old is not None:
-                    title = "Rättelse: målet till %s ✏️" % sc
-                    tags, prio = None, 3
-                elif ours:
+                if ours:
                     title = "MÅÅÅL %s!!! 🔥 %s" % (team_name.upper(), sc)
                     tags, prio = None, 5
                 else:
@@ -912,6 +923,29 @@ class GameFollower:
                     tags, prio = None, 3
                 self.send(title, "\n".join(lines), tags, prio)
 
+        # Samlade rättelser: skickas när målet varit oförändrat i 5 min (eller vid slutsignal)
+        delay = self.cfg.get("correction_delay_seconds", 300)
+        names_sv = {"scorer": "målskytt", "assists": "assist", "situation": "spelläge"}
+        for key, ts in list(pending.items()):
+            if not (info["final"] or time.time() - ts >= delay):
+                continue
+            pending.pop(key, None)
+            cur, base = self.st["goals"].get(key), notified.get(key)
+            if cur is None or base is None:
+                continue
+            changed = [names_sv[f] for f in ("scorer", "assists", "situation") if cur.get(f) != base.get(f)]
+            if not changed:
+                continue
+            ev = next((e for e in goals_now if "%s|%s" % (e["time"], e["team"]) == key), None)
+            if ev is None:
+                continue
+            notified[key] = cur
+            if ev["team"] != us_abbr and not self.cfg.get("notify_opponent_goals", True):
+                continue
+            lines, sc, ours, us_n, them_n = goal_msg(ev)
+            lines.append("Ändrat: " + ", ".join(changed))
+            self.send("Rättelse: målet till %s ✏️" % sc, "\n".join(lines), None, 3)
+
         # Periodslut och periodstart
         if self.cfg.get("notify_periods", True) and not info["final"]:
             pn = period_no(info.get("status"))
@@ -955,6 +989,8 @@ class GameFollower:
                     continue
                 g = self.st["goals"].pop(k)
                 missing.pop(k, None)
+                pending.pop(k, None)
+                notified.pop(k, None)
                 if silent:
                     continue
                 u, th = our_score(info["score"], we_home)

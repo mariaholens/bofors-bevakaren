@@ -56,7 +56,7 @@ DEFAULT_CONFIG = {
     "notify_periods": True,
     "notify_lineup": True,
     # Övriga matcher i serien: mål, assist och utvisningar/numerär till ett eget ntfy-ämne
-    "follow_league": True,
+    "follow_league": False,
     "ntfy_topic_league": "",
     "league_poll_seconds": 30,
     "league_penalties": False,   # utvisningar i övriga matcher
@@ -819,9 +819,9 @@ class GameFollower:
                 sc = "%d–%d" % (us_n, them_n)
                 code = (ev["situation"] or "").upper()
                 if "PP2" in code:
-                    sit = "i dubbelt powerplay 🚀🚀"
+                    sit = "i dubbelt powerplay" + (" 🚀🚀" if ours else "")
                 elif "PP" in code:
-                    sit = "i powerplay 🚀"
+                    sit = "i powerplay" + (" 🚀" if ours else "")
                 elif "SH" in code:
                     sit = "i boxplay" + ("! 💪" if ours else "")
                 elif "ENG" in code or code == "EN":
@@ -831,7 +831,12 @@ class GameFollower:
                 else:
                     sit = ""
                 assists = [surname(a) for a in ev["assists"]]
-                ast = ("Assist: " + join_sv(assists)) if assists else "Soloprestation!"
+                if len(assists) >= 2:
+                    ast = "1:a assist: %s · 2:a assist: %s" % (assists[0], assists[1])
+                elif assists:
+                    ast = "1:a assist: %s" % assists[0]
+                else:
+                    ast = "Soloprestation!"
                 if sit:
                     ast += " · " + sit
                 tail = "%s, %s" % (ev["time"], ev["period"] or "")
